@@ -1,0 +1,2 @@
+CREATE DATABASE ifrms;
+USE DATABASE ifrms;
