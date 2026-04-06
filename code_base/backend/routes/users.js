@@ -1,4 +1,4 @@
-import express from 'express'; 
+import express from 'express';
 import bcrypt from 'bcryptjs';
 import { getDb } from '../db.js';
 import { authenticate, requireRole } from '../middleware/auth.js';

@@ -44,11 +44,11 @@ export default function Auth({ onLogin }) {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-zinc-900/50 border border-zinc-800/80 rounded-3xl p-8"
+        className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl rounded-3xl p-8"
       >
         <div className="text-center mb-8">
           <h2 className="text-3xl font-extrabold tracking-tight mb-2">{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
-          <p className="text-zinc-400 font-medium">{isLogin ? 'Enter your credentials to access your account.' : 'Join MUSCLE UP to start your fitness journey.'}</p>
+          <p className="text-white/60 font-medium">{isLogin ? 'Enter your credentials to access your account.' : 'Join MUSCLE UP to start your fitness journey.'}</p>
         </div>
 
         {error && (
@@ -61,16 +61,16 @@ export default function Auth({ onLogin }) {
           {!isLogin && (
             <>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
-                <input type="text" name="name" placeholder="Full Name" required onChange={handleChange} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-zinc-500 focus:outline-none focus:border-rose-500 transition-colors" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+                <input type="text" name="name" placeholder="Full Name" required onChange={handleChange} className="w-full bg-black/20 backdrop-blur-md border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-zinc-500 focus:outline-none focus:border-rose-500 transition-colors" />
               </div>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
-                <input type="tel" name="phone" placeholder="Phone Number" required onChange={handleChange} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-zinc-500 focus:outline-none focus:border-rose-500 transition-colors" />
+                <input type="tel" name="phone" placeholder="Phone Number" required onChange={handleChange} className="w-full bg-black/20 backdrop-blur-md border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-zinc-500 focus:outline-none focus:border-rose-500 transition-colors" />
               </div>
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
-                <input type="date" name="dob" required onChange={handleChange} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-zinc-500 focus:outline-none focus:border-rose-500 transition-colors" />
+                <input type="date" name="dob" required onChange={handleChange} className="w-full bg-transparent border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-zinc-500 focus:outline-none focus:border-rose-500 transition-colors" />
               </div>
             </>
           )}

@@ -27,10 +27,11 @@ router.get('/', authenticate, async (req, res) => {
       const d = new Date(r.date);
       // Ensure we don't get NaN if date is invalid
       if (isNaN(d.getTime())) return r;
+      const pad = (n) => String(n).padStart(2, '0');
       return {
         ...r,
-        date: d.toISOString().split('T')[0],
-        time: d.toISOString().split('T')[1].substring(0, 5)
+        date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+        time: `${pad(d.getHours())}:${pad(d.getMinutes())}`
       };
     }));
   } catch (error) {
@@ -41,8 +42,8 @@ router.get('/', authenticate, async (req, res) => {
 router.post('/', authenticate, async (req, res) => {
   const { date, time, type, member_id, trainer_id } = req.body;
   try {
-    // Combine date and time into timestamp, forcing UTC to avoid server timezone shifts
-    const sessionDate = new Date(`${date}T${time}Z`).toISOString();
+    // Combine date and time into timestamp without forcing UTC
+    const sessionDate = `${date} ${time}:00`;
     
     const tId = req.user.role === 'trainer' ? req.user.id : trainer_id;
     const mId = req.user.role === 'member' ? req.user.id : member_id;
@@ -77,10 +78,11 @@ router.post('/', authenticate, async (req, res) => {
 
     const r = fullRes.rows[0];
     const d = new Date(r.date);
+    const pad = (n) => String(n).padStart(2, '0');
     res.status(201).json({
       ...r,
-      date: d.toISOString().split('T')[0],
-      time: d.toISOString().split('T')[1].substring(0, 5)
+      date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+      time: `${pad(d.getHours())}:${pad(d.getMinutes())}`
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -92,7 +94,7 @@ router.put('/:id', authenticate, async (req, res) => {
   const { date, time } = req.body;
   
   try {
-    const sessionDate = new Date(`${date}T${time}Z`).toISOString();
+    const sessionDate = `${date} ${time}:00`;
     
     // Verify ownership or admin
     const checkRes = await getDb().query('SELECT * FROM schedules WHERE schedule_id = $1', [id]);
@@ -120,10 +122,11 @@ router.put('/:id', authenticate, async (req, res) => {
 
     const r = fullRes.rows[0];
     const d = new Date(r.date);
+    const pad = (n) => String(n).padStart(2, '0');
     res.json({
       ...r,
-      date: d.toISOString().split('T')[0],
-      time: d.toISOString().split('T')[1].substring(0, 5)
+      date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+      time: `${pad(d.getHours())}:${pad(d.getMinutes())}`
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

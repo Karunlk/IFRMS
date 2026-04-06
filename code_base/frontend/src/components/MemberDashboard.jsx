@@ -48,7 +48,7 @@ export default function MemberDashboard({ user, onNavigate }) {
     .slice(0, 3);
 
   const activeHours = (progress.reduce((acc, curr) => acc + (Number(curr.workout_time) || 0), 0) / 60).toFixed(1);
-console.log(user);
+
 const formatDate = (dateString) => {
   if (!dateString) return "—";
   
@@ -63,7 +63,7 @@ const formatDate = (dateString) => {
     <div className="pt-28 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-10">
         <h1 className="text-4xl font-extrabold tracking-tight mb-2">Welcome back, {user.name.split(' ')[0]}!</h1>
-        <p className="text-lg text-zinc-400 font-medium">Here's your fitness overview for today.</p>
+        <p className="text-lg text-white/60 font-medium">Here's your fitness overview for today.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -77,18 +77,18 @@ const formatDate = (dateString) => {
               { label: 'Active Hrs', value: activeHours, icon: Clock, color: 'text-orange-500', bg: 'bg-orange-500/10' },
               { label: 'Streak', value: 'Active', icon: TrendingUp, color: 'text-rose-500', bg: 'bg-rose-500/10' },
             ].map((stat, i) => (
-              <div key={i} className="bg-zinc-900/50 border border-zinc-800/80 p-5 rounded-3xl">
+              <div key={i} className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl p-5 rounded-3xl">
                 <div className={`w-12 h-12 rounded-2xl ${stat.bg} flex items-center justify-center mb-4`}>
                   <stat.icon className={`w-6 h-6 ${stat.color}`} />
                 </div>
                 <div className="text-3xl font-extrabold mb-1">{stat.value}</div>
-                <div className="text-xs text-zinc-500 font-bold uppercase tracking-wider">{stat.label}</div>
+                <div className="text-xs text-white/40 font-bold uppercase tracking-wider">{stat.label}</div>
               </div>
             ))}
           </div>
 
           {/* Assigned Workout Plans */}
-          <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-3xl p-6 md:p-8">
+          <div className="bg-white/5/50 border border-white/10/80 rounded-3xl p-6 md:p-8">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold tracking-tight">Assigned Workout Plans</h2>
             </div>
@@ -96,7 +96,7 @@ const formatDate = (dateString) => {
               {loading ? (
                 <div className="text-zinc-500">Loading plans...</div>
               ) : workouts.length > 0 ? workouts.map((plan, i) => (
-                <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-zinc-950 rounded-2xl border border-zinc-800/50 gap-4">
+                <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 gap-4">
                   <div className="flex items-center gap-5">
                     <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 bg-blue-500/20 text-blue-500">
                       <FileText className="w-6 h-6" />
@@ -122,7 +122,7 @@ const formatDate = (dateString) => {
               {loading ? (
                 <div className="text-zinc-500">Loading progress...</div>
               ) : progress.length > 0 ? progress.map((prog, i) => (
-                <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-zinc-950 rounded-2xl border border-zinc-800/50 gap-4">
+                <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-transparent rounded-2xl border border-zinc-800/50 gap-4">
                   <div className="flex items-center gap-5">
                     <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 bg-green-500/20 text-green-500">
                       <TrendingUp className="w-6 h-6" />
@@ -152,7 +152,7 @@ const formatDate = (dateString) => {
               {loading ? (
                 <div className="text-zinc-500">Loading...</div>
               ) : upcomingSchedules.length > 0 ? upcomingSchedules.map((session, i) => (
-                <div key={i} className="p-5 border border-zinc-800 rounded-2xl bg-zinc-950 relative overflow-hidden group cursor-pointer hover:border-zinc-700 transition-colors">
+                <div key={i} className="p-5 border border-zinc-800 rounded-2xl bg-zinc-950 relative overflow-hidden group cursor-pointer hover:border-white/20 transition-colors">
                   <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-rose-500" />
                   <div className="text-sm text-rose-500 font-bold mb-2 uppercase tracking-wider">
                     {new Date(session.date.split('-')[0], session.date.split('-')[1] - 1, session.date.split('-')[2]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -166,7 +166,7 @@ const formatDate = (dateString) => {
                 <div className="text-zinc-500">No upcoming sessions.</div>
               )}
             </div>
-            <button onClick={() => onNavigate('schedule')} className="w-full mt-6 py-4 border border-zinc-700 rounded-2xl text-sm font-bold hover:bg-zinc-800 transition-colors">
+            <button onClick={() => onNavigate('schedule')} className="w-full mt-6 py-4 border border-zinc-700 rounded-2xl text-sm font-bold hover:bg-white/10 transition-colors">
               Book New Session
             </button>
           </div>
@@ -178,7 +178,7 @@ const formatDate = (dateString) => {
               {loading ? (
                 <div className="text-zinc-500">Loading...</div>
               ) : programmes.length > 0 ? programmes.map((prog, i) => (
-                <div key={i} className="flex flex-col p-4 bg-zinc-950 rounded-xl border border-zinc-800/50">
+                <div key={i} className="flex flex-col p-4 bg-black/20 backdrop-blur-md rounded-xl border border-white/10">
                   <span className="text-zinc-200 font-bold text-lg">{prog.name}</span>
                   <span className="text-zinc-400 text-sm mb-3">Capacity: {prog.capacity || prog.description}</span>
                   <button onClick={() => handleEnrol(prog.id)} className="px-4 py-2 bg-rose-600 text-white text-sm font-bold rounded-lg hover:bg-rose-500 transition-colors self-start">
@@ -194,14 +194,14 @@ const formatDate = (dateString) => {
           {/* Membership Details */}
           <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-3xl p-6 md:p-8">
             <h2 className="text-2xl font-bold tracking-tight mb-6">Membership Details</h2>
-            <div className="p-4 bg-zinc-950 rounded-xl border border-zinc-800/50">
+            <div className="p-4 bg-black/20 backdrop-blur-md rounded-xl border border-white/10/50">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-zinc-400">Status</span>
                 <span className="px-3 py-1 bg-green-500/10 text-green-500 text-xs font-bold uppercase tracking-wider rounded-md">Active</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-zinc-400">Member Since</span>
-                <span className="text-zinc-200 font-medium">
+                      <span className="text-zinc-200 font-medium">
   {formatDate(user?.membership_date)}
 </span>
               </div>

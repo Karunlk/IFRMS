@@ -35,12 +35,12 @@ export default function Profile({ user }) {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-zinc-900/50 border border-zinc-800/80 rounded-3xl p-8"
+        className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl rounded-3xl p-8"
       >
-        <div className="flex items-center justify-between mb-8 pb-8 border-b border-zinc-800">
+        <div className="flex items-center justify-between mb-8 pb-8 border-b border-white/10">
           <div className="flex items-center gap-6">
-            <div className="w-24 h-24 bg-zinc-800 rounded-full flex items-center justify-center border-2 border-rose-500">
-              <User className="w-10 h-10 text-zinc-400" />
+            <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center border-2 border-rose-500">
+              <User className="w-10 h-10 text-white/60" />
             </div>
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">{user.name}</h1>
@@ -62,7 +62,7 @@ export default function Profile({ user }) {
             </button>
           ) : (
             <div className="flex gap-2">
-              <button onClick={() => setIsEditing(false)} className="p-3 bg-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-700 transition-colors">
+              <button onClick={() => setIsEditing(false)} className="p-3 bg-zinc-800 text-white font-bold rounded-xl hover:bg-white/20 transition-colors">
                 <X className="w-5 h-5" />
               </button>
               <button onClick={handleSave} disabled={loading} className="flex items-center gap-2 px-6 py-3 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-500 transition-colors">
@@ -77,8 +77,8 @@ export default function Profile({ user }) {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-zinc-500 uppercase tracking-wider">Full Name</label>
-              <div className="flex items-center gap-3 p-4 bg-zinc-950 rounded-xl border border-zinc-800">
+              <label className="text-sm font-bold text-white/40 uppercase tracking-wider">Full Name</label>
+              <div className="flex items-center gap-3 p-4 bg-black/20 backdrop-blur-md rounded-xl border border-white/10">
                 <User className="w-5 h-5 text-zinc-400" />
                 {isEditing ? (
                   <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="bg-transparent border-none outline-none w-full text-white" />
@@ -90,7 +90,7 @@ export default function Profile({ user }) {
             
             <div className="space-y-2">
               <label className="text-sm font-bold text-zinc-500 uppercase tracking-wider">Email Address</label>
-              <div className="flex items-center gap-3 p-4 bg-zinc-950 rounded-xl border border-zinc-800">
+              <div className="flex items-center gap-3 p-4 bg-transparent rounded-xl border border-zinc-800">
                 <Mail className="w-5 h-5 text-zinc-400" />
                 {isEditing ? (
                   <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="bg-transparent border-none outline-none w-full text-white" />

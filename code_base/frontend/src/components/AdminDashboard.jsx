@@ -151,7 +151,7 @@ export default function AdminDashboard({ user, onNavigate }) {
   };
 
   if (loading) {
-    return <div className="pt-28 pb-20 max-w-7xl mx-auto px-4 text-center text-zinc-400">Loading dashboard data...</div>;
+    return <div className="pt-28 pb-20 max-w-7xl mx-auto px-4 text-center text-white/60">Loading dashboard data...</div>;
   }
 
   const renderOverview = () => (
@@ -163,25 +163,25 @@ export default function AdminDashboard({ user, onNavigate }) {
           { label: 'Equipment Issues', value: equipmentList.filter(e => e.status === 'Maintenance').length, icon: Dumbbell, color: 'text-orange-500', bg: 'bg-orange-500/10' },
           { label: 'Reports Generated', value: reportsList.length, icon: FileText, color: 'text-rose-500', bg: 'bg-rose-500/10' },
         ].map((stat, i) => (
-          <div key={i} className="bg-zinc-900/50 border border-zinc-800/80 p-5 rounded-3xl">
+          <div key={i} className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl p-5 rounded-3xl">
             <div className={`w-12 h-12 rounded-2xl ${stat.bg} flex items-center justify-center mb-4`}>
               <stat.icon className={`w-6 h-6 ${stat.color}`} />
             </div>
             <div className="text-3xl font-extrabold mb-1">{stat.value}</div>
-            <div className="text-xs text-zinc-500 font-bold uppercase tracking-wider">{stat.label}</div>
+            <div className="text-xs text-white/40 font-bold uppercase tracking-wider">{stat.label}</div>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-3xl p-6 md:p-8">
+        <div className="bg-white/5/50 border border-white/10/80 rounded-3xl p-6 md:p-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold tracking-tight">Equipment Status</h2>
             <button onClick={() => setActiveTab('equipment')} className="text-sm font-bold text-rose-500 hover:text-rose-400">Manage Inventory</button>
           </div>
           <div className="space-y-4">
             {equipmentList.slice(0, 4).map((eq) => (
-              <div key={eq.id} className="flex justify-between items-center p-4 bg-zinc-950 rounded-xl border border-zinc-800/50">
+              <div key={eq.id} className="flex justify-between items-center p-4 bg-black/20 backdrop-blur-md rounded-xl border border-white/10">
                 <span className="font-medium">{eq.name}</span>
                 <span className={`px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-md ${
                   eq.status === 'Available' ? 'text-green-500 bg-green-500/10' :
@@ -201,12 +201,12 @@ export default function AdminDashboard({ user, onNavigate }) {
           </div>
           <div className="space-y-4">
             {reportsList.slice(0, 4).map((report) => (
-              <div key={report.id} className="flex justify-between items-center p-4 bg-zinc-950 rounded-xl border border-zinc-800/50">
+              <div key={report.id} className="flex justify-between items-center p-4 bg-black/20 backdrop-blur-md rounded-xl border border-white/10/50">
                 <div>
                   <div className="font-medium">{report.title}</div>
                   <div className="text-sm text-zinc-400">{report.date}</div>
                 </div>
-                <span className="px-3 py-1 bg-zinc-800 text-zinc-300 text-xs font-bold uppercase tracking-wider rounded-md">
+                <span className="px-3 py-1 bg-white/10 text-white/80 text-xs font-bold uppercase tracking-wider rounded-md">
                   {report.type}
                 </span>
               </div>
@@ -227,9 +227,10 @@ export default function AdminDashboard({ user, onNavigate }) {
       </div>
 
       {showUserForm && (
-        <form onSubmit={handleAddUser} className="mb-8 p-6 bg-zinc-950 border border-zinc-800 rounded-2xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <input type="text" placeholder="Full Name" required value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} className="bg-zinc-900 border border-zinc-800 rounded-xl py-2 px-4 text-white focus:outline-none focus:border-rose-500" />
+        <form onSubmit={handleAddUser} className="mb-8 p-6 bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <input type="text" placeholder="Full Name" required value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} className="bg-black/20 backdrop-blur-md border border-white/10 rounded-xl py-2 px-4 text-white focus:outline-none focus:border-rose-500" />
           <input type="email" placeholder="Email" required value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} className="bg-zinc-900 border border-zinc-800 rounded-xl py-2 px-4 text-white focus:outline-none focus:border-rose-500" />
+          <input type="password" placeholder="Password" required value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="bg-zinc-900 border border-zinc-800 rounded-xl py-2 px-4 text-white focus:outline-none focus:border-rose-500" />
           <input type="text" placeholder="Phone Number" required value={newUser.phone} onChange={e => setNewUser({...newUser, phone: e.target.value})} className="bg-zinc-900 border border-zinc-800 rounded-xl py-2 px-4 text-white focus:outline-none focus:border-rose-500" />
           <input type="date" required value={newUser.dob} onChange={e => setNewUser({...newUser, dob: e.target.value})} className="bg-zinc-900 border border-zinc-800 rounded-xl py-2 px-4 text-white focus:outline-none focus:border-rose-500" />
           <select value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})} className="bg-zinc-900 border border-zinc-800 rounded-xl py-2 px-4 text-white focus:outline-none focus:border-rose-500">
@@ -286,7 +287,7 @@ export default function AdminDashboard({ user, onNavigate }) {
       </div>
 
       {showEqForm && (
-        <form onSubmit={handleAddEq} className="mb-8 p-6 bg-zinc-950 border border-zinc-800 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-4">
+        <form onSubmit={handleAddEq} className="mb-8 p-6 bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-4">
           <input type="text" placeholder="Equipment Name" required value={newEq.name} onChange={e => setNewEq({...newEq, name: e.target.value})} className="bg-zinc-900 border border-zinc-800 rounded-xl py-2 px-4 text-white focus:outline-none focus:border-rose-500" />
           <select value={newEq.status} onChange={e => setNewEq({...newEq, status: e.target.value})} className="bg-zinc-900 border border-zinc-800 rounded-xl py-2 px-4 text-white focus:outline-none focus:border-rose-500">
             <option value="Available">Available</option>
@@ -346,7 +347,7 @@ export default function AdminDashboard({ user, onNavigate }) {
 
       <div className="space-y-4">
         {reportsList.map((report) => (
-          <div key={report.id} className="flex justify-between items-center p-5 bg-zinc-950 rounded-xl border border-zinc-800/50 hover:border-zinc-700 transition-colors cursor-pointer">
+          <div key={report.id} className="flex justify-between items-center p-5 bg-transparent rounded-xl border border-zinc-800/50 hover:border-white/20 transition-colors cursor-pointer">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
                 <FileText className="w-5 h-5 text-zinc-400" />

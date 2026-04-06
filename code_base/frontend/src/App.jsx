@@ -24,6 +24,23 @@ export default function App() {
     }
   }, []);
 
+  useEffect(() => {
+    let title = 'MUSCLE UP';
+    switch (currentView) {
+      case 'landing': title = 'Home | MUSCLE UP'; break;
+      case 'auth': title = 'Login | MUSCLE UP'; break;
+      case 'profile': title = 'Profile | MUSCLE UP'; break;
+      case 'schedule': title = 'Schedule | MUSCLE UP'; break;
+      case 'dashboard':
+        if (user?.role === 'admin') title = 'Admin Dashboard | MUSCLE UP';
+        else if (user?.role === 'trainer') title = 'Trainer Dashboard | MUSCLE UP';
+        else title = 'Member Dashboard | MUSCLE UP';
+        break;
+      default: title = 'MUSCLE UP';
+    }
+    document.title = title;
+  }, [currentView, user]);
+
   const handleLogin = (userData, token) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
@@ -53,7 +70,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans selection:bg-rose-500/30">
+    <div className="min-h-screen bg-transparent text-white font-sans selection:bg-rose-500/30">
       <Navbar user={user} onLogout={handleLogout} onNavigate={setCurrentView} currentView={currentView} />
       {renderView()}
     </div>

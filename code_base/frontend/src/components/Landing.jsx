@@ -60,7 +60,7 @@ export default function Landing({ onNavigate }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-lg md:text-xl text-zinc-400 mb-10 max-w-2xl mx-auto font-medium"
+            className="text-lg md:text-xl text-white/60 mb-10 max-w-2xl mx-auto font-medium"
           >
             MUSCLE UP Gym Management System. Track your workouts, book expert trainers, and achieve your goals with real-time insights.
           </motion.p>
@@ -125,7 +125,7 @@ export default function Landing({ onNavigate }) {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl z-10"
+              className="relative w-full max-w-2xl bg-black/20 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden shadow-2xl z-10"
             >
               <div className="h-64 sm:h-80 relative">
                 <img src={selectedProgram.image} alt={selectedProgram.title} className="w-full h-full object-cover" />
@@ -149,8 +149,8 @@ export default function Landing({ onNavigate }) {
                 
                 <h3 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">{selectedProgram.title}</h3>
                 
-                <div className="flex flex-wrap gap-6 mb-6 pb-6 border-b border-zinc-800">
-                  <div className="flex items-center gap-2 text-zinc-300">
+                <div className="flex flex-wrap gap-6 mb-6 pb-6 border-b border-white/10">
+                  <div className="flex items-center gap-2 text-white/80">
                     <Clock className="w-5 h-5 text-rose-500" />
                     <span className="font-medium">{selectedProgram.duration}</span>
                   </div>

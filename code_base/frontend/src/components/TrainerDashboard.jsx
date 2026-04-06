@@ -79,7 +79,7 @@ export default function TrainerDashboard({ user, onNavigate }) {
     <div className="pt-28 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-10">
         <h1 className="text-4xl font-extrabold tracking-tight mb-2">Trainer Portal</h1>
-        <p className="text-lg text-zinc-400 font-medium">Manage your clients, schedules, and workout plans.</p>
+        <p className="text-lg text-white/60 font-medium">Manage your clients, schedules, and workout plans.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -88,19 +88,19 @@ export default function TrainerDashboard({ user, onNavigate }) {
           { label: 'Sessions Today', value: todaySchedules.length, icon: Activity, color: 'text-green-500', bg: 'bg-green-500/10' },
           { label: 'Plans Created', value: workouts.length, icon: FileEdit, color: 'text-rose-500', bg: 'bg-rose-500/10' },
         ].map((stat, i) => (
-          <div key={i} className="bg-zinc-900/50 border border-zinc-800/80 p-5 rounded-3xl">
+          <div key={i} className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl p-5 rounded-3xl">
             <div className={`w-12 h-12 rounded-2xl ${stat.bg} flex items-center justify-center mb-4`}>
               <stat.icon className={`w-6 h-6 ${stat.color}`} />
             </div>
             <div className="text-3xl font-extrabold mb-1">{stat.value}</div>
-            <div className="text-xs text-zinc-500 font-bold uppercase tracking-wider">{stat.label}</div>
+            <div className="text-xs text-white/40 font-bold uppercase tracking-wider">{stat.label}</div>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Today's Schedule */}
-        <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-3xl p-6 md:p-8">
+        <div className="bg-white/5/50 border border-white/10/80 rounded-3xl p-6 md:p-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold tracking-tight">Today's Schedule</h2>
             <button onClick={() => onNavigate('schedule')} className="text-sm font-bold text-rose-500 hover:text-rose-400">View Calendar</button>
@@ -109,7 +109,7 @@ export default function TrainerDashboard({ user, onNavigate }) {
             {loading ? (
               <div className="text-zinc-500">Loading...</div>
             ) : todaySchedules.length > 0 ? todaySchedules.map((session, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 bg-zinc-950 rounded-xl border border-zinc-800/50">
+              <div key={i} className="flex items-center gap-4 p-4 bg-black/20 backdrop-blur-md rounded-xl border border-white/10">
                 <div className="w-20 text-sm font-bold text-rose-500">{session.time}</div>
                 <div className="flex-1 border-l border-zinc-800 pl-4">
                   <div className="font-medium">{session.member}</div>
@@ -134,13 +134,13 @@ export default function TrainerDashboard({ user, onNavigate }) {
               <div className="text-zinc-500">Loading...</div>
             ) : upcomingSchedules.length > 0 ? 
               upcomingSchedules.slice(0, 4).map((session, i) => (
-              <div key={i} className="flex items-start gap-4 p-4 bg-zinc-950 rounded-xl border border-zinc-800/50">
-                <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
+              <div key={i} className="flex items-start gap-4 p-4 bg-black/20 backdrop-blur-md rounded-xl border border-white/10/50">
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
                   <Calendar className="w-5 h-5 text-zinc-400" />
                 </div>
                 <div>
                   <div className="font-medium">{session.member}</div>
-                  <div className="text-sm text-zinc-300 mt-1">{session.type || 'Training Session'}</div>
+                  <div className="text-sm text-white/80 mt-1">{session.type || 'Training Session'}</div>
                   <div className="text-xs text-zinc-500 mt-2">
                     {new Date(session.date.split('-')[0], session.date.split('-')[1] - 1, session.date.split('-')[2]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at {session.time}
                   </div>
@@ -162,8 +162,8 @@ export default function TrainerDashboard({ user, onNavigate }) {
           </div>
 
           {showWorkoutForm && (
-            <form onSubmit={handleCreateWorkout} className="mb-6 p-4 bg-zinc-950 border border-zinc-800 rounded-2xl flex flex-col gap-4">
-              <select required value={newWorkout.member_id} onChange={e => setNewWorkout({...newWorkout, member_id: e.target.value})} className="bg-zinc-900 border border-zinc-800 rounded-xl py-2 px-4 text-white focus:outline-none focus:border-rose-500">
+            <form onSubmit={handleCreateWorkout} className="mb-6 p-4 bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col gap-4">
+              <select required value={newWorkout.member_id} onChange={e => setNewWorkout({...newWorkout, member_id: e.target.value})} className="bg-black/20 backdrop-blur-md border border-white/10 rounded-xl py-2 px-4 text-white focus:outline-none focus:border-rose-500">
                 <option value="">Select Member</option>
                 {members.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
               </select>
@@ -176,7 +176,7 @@ export default function TrainerDashboard({ user, onNavigate }) {
             {loading ? (
               <div className="text-zinc-500">Loading...</div>
             ) : workouts.length > 0 ? workouts.map((plan, i) => (
-              <div key={i} className="p-4 bg-zinc-950 rounded-xl border border-zinc-800/50">
+              <div key={i} className="p-4 bg-transparent rounded-xl border border-zinc-800/50">
                 <div className="font-bold mb-1">Member #{plan.member_id}</div>
                 <div className="text-sm text-zinc-400">{plan.workout_description}</div>
                 <div className="text-xs text-zinc-500 mt-2">{new Date(plan.created_at).toLocaleDateString()}</div>
@@ -197,7 +197,7 @@ export default function TrainerDashboard({ user, onNavigate }) {
           </div>
 
           {showProgressForm && (
-            <form onSubmit={handleRecordProgress} className="mb-6 p-4 bg-zinc-950 border border-zinc-800 rounded-2xl grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleRecordProgress} className="mb-6 p-4 bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl grid grid-cols-1 md:grid-cols-2 gap-4">
               <select required value={newProgress.member_id} onChange={e => setNewProgress({...newProgress, member_id: e.target.value})} className="md:col-span-2 bg-zinc-900 border border-zinc-800 rounded-xl py-2 px-4 text-white focus:outline-none focus:border-rose-500">
                 <option value="">Select Member</option>
                 {members.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}

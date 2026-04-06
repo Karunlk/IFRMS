@@ -80,7 +80,7 @@ export default function Schedule({ user }) {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight mb-2">Schedule</h1>
-          <p className="text-lg text-zinc-400 font-medium">
+          <p className="text-lg text-white/60 font-medium">
             {user.role === 'member' ? 'View your upcoming training sessions.' :
              user.role === 'trainer' ? 'Manage your training sessions with members.' :
              'Overview of all facility schedules.'}
@@ -95,23 +95,23 @@ export default function Schedule({ user }) {
       </div>
 
       {showForm && (
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-zinc-900/50 border border-zinc-800/80 rounded-3xl p-6 md:p-8 mb-8 relative">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl rounded-3xl p-6 md:p-8 mb-8 relative">
           <button onClick={() => setShowForm(false)} className="absolute top-6 right-6 text-zinc-400 hover:text-white">
             <X className="w-6 h-6" />
           </button>
           <h2 className="text-2xl font-bold mb-6">Schedule New Session</h2>
           <form onSubmit={handleAddSession} className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-bold text-zinc-500 mb-2">Date</label>
-              <input type="date" required value={newSession.date} onChange={e => setNewSession({...newSession, date: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-rose-500" />
+              <label className="block text-sm font-bold text-white/40 mb-2">Date</label>
+              <input type="date" required value={newSession.date} onChange={e => setNewSession({...newSession, date: e.target.value})} className="w-full bg-black/20 backdrop-blur-md border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-rose-500" />
             </div>
             <div>
               <label className="block text-sm font-bold text-zinc-500 mb-2">Time</label>
-              <input type="time" required value={newSession.time} onChange={e => setNewSession({...newSession, time: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-rose-500" />
+              <input type="time" required value={newSession.time} onChange={e => setNewSession({...newSession, time: e.target.value})} className="w-full bg-black/20 backdrop-blur-md border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-rose-500" />
             </div>
             <div>
               <label className="block text-sm font-bold text-zinc-500 mb-2">Member</label>
-              <select required value={newSession.member_id} onChange={e => setNewSession({...newSession, member_id: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-rose-500">
+              <select required value={newSession.member_id} onChange={e => setNewSession({...newSession, member_id: e.target.value})} className="w-full bg-transparent border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-rose-500">
                 <option value="">Select Member</option>
                 {usersList.map(u => (
                   <option key={u.id} value={u.id}>{u.name}</option>
@@ -126,7 +126,7 @@ export default function Schedule({ user }) {
       )}
 
       {rescheduleSession && (
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-zinc-900/50 border border-zinc-800/80 rounded-3xl p-6 md:p-8 mb-8 relative">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/5/50 border border-zinc-800/80 rounded-3xl p-6 md:p-8 mb-8 relative">
           <button onClick={() => setRescheduleSession(null)} className="absolute top-6 right-6 text-zinc-400 hover:text-white">
             <X className="w-6 h-6" />
           </button>
@@ -152,7 +152,7 @@ export default function Schedule({ user }) {
           {loading ? (
             <div className="p-12 text-center text-zinc-500 font-medium">Loading schedule...</div>
           ) : filteredSessions.length > 0 ? filteredSessions.map(session => (
-            <div key={session.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-zinc-800/20 transition-colors">
+            <div key={session.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/10/20 transition-colors">
               <div className="flex items-center gap-6">
                 <div className="w-16 h-16 rounded-2xl bg-zinc-950 border border-zinc-800 flex flex-col items-center justify-center shrink-0">
                   <span className="text-xs font-bold text-rose-500 uppercase">
@@ -173,7 +173,7 @@ export default function Schedule({ user }) {
                 <span className="px-4 py-1.5 bg-green-500/10 text-green-500 text-sm font-bold uppercase tracking-wider rounded-lg">Confirmed</span>
                 <button 
                   onClick={() => setRescheduleSession(session)}
-                  className="px-4 py-1.5 bg-zinc-800 text-white text-sm font-bold rounded-lg hover:bg-zinc-700 transition-colors"
+                  className="px-4 py-1.5 bg-zinc-800 text-white text-sm font-bold rounded-lg hover:bg-white/20 transition-colors"
                 >
                   Reschedule
                 </button>
