@@ -80,7 +80,7 @@ IFRMS/
 │   ├── SRS.pdf                  # Software Requirements Specification
 │   ├── SDD.docx                 # System Design Document
 │   └── ER_Diagram.drawio        # Chen's ER Diagram
-├── ifrmsweb/
+├── code_base/
     ├── frontend/                    # Next.js app
     └── backend/                     # Node.js + Express API
 └── database/
