@@ -154,7 +154,7 @@ All project documentation is available in the [`docs/`](./docs) folder:
 
 4. **Install and run the website**
    ```bash
-   cd ifrmsweb
+   cd code
    npm install
    npm run dev
    ```
