@@ -45,7 +45,6 @@ router.post('/create-intent', authenticate, requireRole('member'), async (req, r
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
         [req.user.id, amount, 'INR', 'pending', plan, months, paymentIntent.id]
       );
-
       return res.json({
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
@@ -110,7 +109,6 @@ router.post('/confirm', authenticate, requireRole('member'), async (req, res) =>
        WHERE stripe_payment_intent_id = $1 AND member_id = $2`,
       [paymentIntentId, req.user.id]
     );
-
     // Calculate new expiry date (extend from today or from existing expiry)
     const memberRes = await db.query(
       'SELECT membership_expiry_date FROM members WHERE member_id = $1',

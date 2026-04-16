@@ -405,15 +405,16 @@ export function getDb() {
         if (query.includes('select fp.* from fitness_progress fp join workout_plans wp')) {
           if (query.includes('where wp.member_id = $1')) {
              const planIds = mockData.workout_plans.filter(w => w.member_id == params[0]).map(w => w.workout_plan_id);
-             return { rows: mockData.fitness_progress.filter(p => planIds.includes(p.workout_plan_id)) };
+             return { rows: mockData.fitness_progress.filter(p => planIds.includes(p.workout_plan_id)).map(p => ({ ...p, recorded_at: p.progress_date || p.recorded_at })) };
           }
           if (query.includes('where wp.trainer_id = $1')) {
              const planIds = mockData.workout_plans.filter(w => w.trainer_id == params[0]).map(w => w.workout_plan_id);
-             return { rows: mockData.fitness_progress.filter(p => planIds.includes(p.workout_plan_id)) };
+             return { rows: mockData.fitness_progress.filter(p => planIds.includes(p.workout_plan_id)).map(p => ({ ...p, recorded_at: p.progress_date || p.recorded_at })) };
           }
         }
         if (query.includes('insert into fitness_progress')) {
-          const newProg = { progress_id: Date.now(), workout_plan_id: params[0], weight: params[1], reps: params[2], workout_time: params[3], progress_date: new Date().toISOString() };
+          const ts = new Date().toISOString();
+          const newProg = { progress_id: Date.now(), workout_plan_id: params[0], weight: params[1], reps: params[2], workout_time: params[3], progress_date: ts, recorded_at: ts };
           mockData.fitness_progress.push(newProg);
           return { rows: [newProg] };
         }
@@ -431,7 +432,7 @@ export function getDb() {
         }
 
         // Members - expiry and plan queries
-        if (query.includes('select membership_date from members where member_id')) {
+        if (query.includes('select membership_expiry_date from members') || query.includes('select membership_date from members')) {
           const m = mockData.members.find(m => m.member_id == params[0]);
           return { rows: m ? [m] : [] };
         }
@@ -452,10 +453,12 @@ export function getDb() {
             amount: params[1],
             currency: params[2] || 'INR',
             status: params[3] || 'pending',
-            payment_method: params[4] || 'card',
-            stripe_payment_intent_id: params[5] || null,
-            membership_plan: params[6] || 'basic',
-            months: params[7] || 1,
+            // params[4] is membership_plan, params[5] is months, params[6] is stripe_payment_intent_id
+            // when called from create-intent: [member_id, amount, currency, status, plan, months, intentId]
+            membership_plan: params[4] || 'basic',
+            months: params[5] || 1,
+            stripe_payment_intent_id: params[6] || null,
+            payment_method: 'card',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           };
@@ -463,15 +466,35 @@ export function getDb() {
           return { rows: [newPayment] };
         }
         if (query.includes('update payments set status')) {
-          const p = mockData.payments.find(p => p.payment_id == params[1]);
-          if (p) p.status = params[0];
+          // Called with [intentId, member_id] - find by intentId
+          const intentId = params[0];
+          const memberId = params[1];
+          const p = mockData.payments.find(p => p.stripe_payment_intent_id == intentId && p.member_id == memberId);
+          if (p) p.status = 'succeeded';
           return { rows: [] };
         }
-        if (query.includes('select * from payments') || query.includes('select p.payment_id')) {
-          const filtered = query.includes('where') && params[0]
+        if (query.includes('select p.payment_id') || (query.includes('select * from payments') && query.includes('member_id'))) {
+          const filtered = params[0]
             ? mockData.payments.filter(p => p.member_id == params[0])
             : mockData.payments;
-          return { rows: filtered };
+          return {
+            rows: filtered.map(p => {
+              const member = mockData.users.find(u => u.user_id == p.member_id);
+              return { ...p, id: p.payment_id, plan: p.membership_plan, member_name: member?.name || '—', member_email: member?.email || '—' };
+            })
+          };
+        }
+        if (query.includes('select * from payments') || query.includes('select payment_id as id')) {
+          const filtered = params[0]
+            ? mockData.payments.filter(p => p.member_id == params[0])
+            : mockData.payments;
+          // Add mock member info for admin view
+          return {
+            rows: filtered.map(p => {
+              const member = mockData.users.find(u => u.user_id == p.member_id);
+              return { ...p, id: p.payment_id, plan: p.membership_plan, member_name: member?.name || '—', member_email: member?.email || '—' };
+            })
+          };
         }
 
         // Notifications
