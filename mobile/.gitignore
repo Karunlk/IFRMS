@@ -1,0 +1,11 @@
+# React Native / Expo
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+
+# Play Store / Firebase secrets — never commit these
+mobile/google-services.json
+mobile/google-play-service-account.json
+mobile/*.keystore
+mobile/*.jks
