@@ -1,5 +1,7 @@
 CREATE TYPE user_role AS ENUM ('member', 'trainer', 'admin');
 CREATE TYPE equipment_status_type AS ENUM ('Available', 'In Use', 'Maintenance');
+CREATE TYPE membership_plan_type AS ENUM ('basic', 'standard', 'premium');
+CREATE TYPE payment_status_type AS ENUM ('pending', 'succeeded', 'failed', 'refunded');
 
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
@@ -15,7 +17,34 @@ CREATE TABLE users (
 CREATE TABLE members (
     member_id INT PRIMARY KEY,
     membership_date DATE NOT NULL,
+    membership_expiry_date DATE,
+    membership_plan membership_plan_type DEFAULT 'basic',
     FOREIGN KEY (member_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE payments (
+    payment_id SERIAL PRIMARY KEY,
+    member_id INT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    currency VARCHAR(10) DEFAULT 'INR',
+    status payment_status_type DEFAULT 'pending',
+    payment_method VARCHAR(50) DEFAULT 'card',
+    stripe_payment_intent_id VARCHAR(255),
+    membership_plan membership_plan_type NOT NULL,
+    months INT NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (member_id) REFERENCES members(member_id) ON DELETE CASCADE
+);
+
+CREATE TABLE notifications (
+    notification_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE trainers (

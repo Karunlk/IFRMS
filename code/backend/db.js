@@ -15,7 +15,11 @@ const mockData = {
     { user_id: 3, user_type: 'member', name: 'Member User', email: 'member@muscleup.com', password: defaultPassword, phone_number: '123-456-7890', dob: '1990-01-01' }
   ],
   members: [
-    { member_id: 3, membership_date: '2024-01-01' }
+    { member_id: 3, membership_date: '2024-01-01', membership_expiry_date: '2025-01-01', membership_plan: 'basic' }
+  ],
+  payments: [],
+  notifications: [
+    { notification_id: 1, user_id: 3, title: 'Welcome to MUSCLE UP!', message: 'Your membership is active. Start your fitness journey today!', is_read: false, created_at: new Date().toISOString() }
   ],
   trainers: [
     { trainer_id: 2, specialization: 'General Fitness' }
@@ -76,7 +80,34 @@ export async function initDb() {
         CREATE TABLE IF NOT EXISTS members (
             member_id INT PRIMARY KEY,
             membership_date DATE NOT NULL,
+            membership_expiry_date DATE,
+            membership_plan VARCHAR(20) DEFAULT 'basic',
             FOREIGN KEY (member_id) REFERENCES users(user_id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS payments (
+            payment_id SERIAL PRIMARY KEY,
+            member_id INT NOT NULL,
+            amount DECIMAL(10,2) NOT NULL,
+            currency VARCHAR(10) DEFAULT 'INR',
+            status VARCHAR(20) DEFAULT 'pending',
+            payment_method VARCHAR(50) DEFAULT 'card',
+            stripe_payment_intent_id VARCHAR(255),
+            membership_plan VARCHAR(20) NOT NULL,
+            months INT NOT NULL DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (member_id) REFERENCES members(member_id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS notifications (
+            notification_id SERIAL PRIMARY KEY,
+            user_id INT NOT NULL,
+            title VARCHAR(200) NOT NULL,
+            message TEXT NOT NULL,
+            is_read BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
         );
 
         CREATE TABLE IF NOT EXISTS trainers (
@@ -197,8 +228,8 @@ export async function initDb() {
         `, [defaultPassword]);
         
         await db.query(`
-          INSERT INTO members (member_id, membership_date) VALUES 
-          (3, CURRENT_DATE);
+          INSERT INTO members (member_id, membership_date, membership_expiry_date, membership_plan) VALUES 
+          (3, CURRENT_DATE, CURRENT_DATE + INTERVAL '1 month', 'basic');
         `);
 
         await db.query(`
@@ -397,6 +428,76 @@ export function getDb() {
             user.dob = params[3];
             return { rows: [user] };
           }
+        }
+
+        // Members - expiry and plan queries
+        if (query.includes('select membership_date from members where member_id')) {
+          const m = mockData.members.find(m => m.member_id == params[0]);
+          return { rows: m ? [m] : [] };
+        }
+        if (query.includes('update members set membership_expiry_date')) {
+          const m = mockData.members.find(m => m.member_id == params[2]);
+          if (m) {
+            m.membership_expiry_date = params[0];
+            m.membership_plan = params[1];
+          }
+          return { rows: [] };
+        }
+
+        // Payments
+        if (query.includes('insert into payments')) {
+          const newPayment = {
+            payment_id: Date.now(),
+            member_id: params[0],
+            amount: params[1],
+            currency: params[2] || 'INR',
+            status: params[3] || 'pending',
+            payment_method: params[4] || 'card',
+            stripe_payment_intent_id: params[5] || null,
+            membership_plan: params[6] || 'basic',
+            months: params[7] || 1,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          mockData.payments.push(newPayment);
+          return { rows: [newPayment] };
+        }
+        if (query.includes('update payments set status')) {
+          const p = mockData.payments.find(p => p.payment_id == params[1]);
+          if (p) p.status = params[0];
+          return { rows: [] };
+        }
+        if (query.includes('select * from payments') || query.includes('select p.payment_id')) {
+          const filtered = query.includes('where') && params[0]
+            ? mockData.payments.filter(p => p.member_id == params[0])
+            : mockData.payments;
+          return { rows: filtered };
+        }
+
+        // Notifications
+        if (query.includes('insert into notifications')) {
+          const newNotif = {
+            notification_id: Date.now(),
+            user_id: params[0],
+            title: params[1],
+            message: params[2],
+            is_read: false,
+            created_at: new Date().toISOString()
+          };
+          mockData.notifications.push(newNotif);
+          return { rows: [newNotif] };
+        }
+        if (query.includes('select * from notifications') || query.includes('select notification_id')) {
+          return { rows: mockData.notifications.filter(n => n.user_id == params[0]).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) };
+        }
+        if (query.includes('update notifications set is_read')) {
+          if (params[1]) {
+            const n = mockData.notifications.find(n => n.notification_id == params[1] && n.user_id == params[0]);
+            if (n) n.is_read = true;
+          } else {
+            mockData.notifications.filter(n => n.user_id == params[0]).forEach(n => n.is_read = true);
+          }
+          return { rows: [] };
         }
 
         return { rows: [] };

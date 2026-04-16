@@ -18,6 +18,8 @@ import usersRoutes from './routes/users.js';
 import programmesRoutes from './routes/programmes.js';
 import workoutsRoutes from './routes/workouts.js';
 import progressRoutes from './routes/progress.js';
+import paymentsRoutes from './routes/payments.js';
+import notificationsRoutes from './routes/notifications.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -39,6 +41,8 @@ async function startServer() {
   app.use('/api/programmes', programmesRoutes);
   app.use('/api/workouts', workoutsRoutes);
   app.use('/api/progress', progressRoutes);
+  app.use('/api/payments', paymentsRoutes);
+  app.use('/api/notifications', notificationsRoutes);
 
   // Vite Middleware for Frontend
   if (process.env.NODE_ENV !== 'production') {
