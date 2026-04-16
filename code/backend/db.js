@@ -10,9 +10,9 @@ const defaultPassword = bcrypt.hashSync('password123', 10);
 // In-memory mock data for when DATABASE_URL is not provided
 const mockData = {
   users: [
-    { user_id: 1, user_type: 'admin', name: 'Admin User', email: 'admin@muscleup.com', password: defaultPassword, phone_number: '123-456-7890', dob: '1990-01-01' },
-    { user_id: 2, user_type: 'trainer', name: 'Trainer User', email: 'trainer@muscleup.com', password: defaultPassword, phone_number: '123-456-7890', dob: '1990-01-01' },
-    { user_id: 3, user_type: 'member', name: 'Member User', email: 'member@muscleup.com', password: defaultPassword, phone_number: '123-456-7890', dob: '1990-01-01' }
+    { user_id: 1, user_type: 'admin', name: 'Admin User', email: 'admin@muscleup.com', password: defaultPassword, phone_number: '123-456-7890', dob: '1990-01-01', firebase_uid: null, avatar_url: null },
+    { user_id: 2, user_type: 'trainer', name: 'Trainer User', email: 'trainer@muscleup.com', password: defaultPassword, phone_number: '123-456-7890', dob: '1990-01-01', firebase_uid: null, avatar_url: null },
+    { user_id: 3, user_type: 'member', name: 'Member User', email: 'member@muscleup.com', password: defaultPassword, phone_number: '123-456-7890', dob: '1990-01-01', firebase_uid: null, avatar_url: null }
   ],
   members: [
     { member_id: 3, membership_date: '2024-01-01', membership_expiry_date: '2025-01-01', membership_plan: 'basic' }
@@ -71,9 +71,11 @@ export async function initDb() {
             user_type user_role NOT NULL,
             name VARCHAR(100) NOT NULL,
             email VARCHAR(100) UNIQUE NOT NULL,
-            password VARCHAR(255) NOT NULL,
+            password VARCHAR(255),
             phone_number VARCHAR(15),
             dob DATE,
+            firebase_uid VARCHAR(128) UNIQUE,
+            avatar_url TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -295,13 +297,33 @@ export function getDb() {
         
         // Users
         if (query.includes('insert into users')) {
-          const newUser = { user_id: Date.now(), user_type: params[0], name: params[1], email: params[2], password: params[3], phone_number: params[4], dob: params[5] };
+          // Firebase upsert: INSERT INTO users (user_type, name, email, phone_number, dob, firebase_uid, avatar_url)
+          if (query.includes('firebase_uid')) {
+            const newUser = {
+              user_id: Date.now(), user_type: params[0], name: params[1], email: params[2],
+              password: null, phone_number: params[3] || null, dob: params[4] || null,
+              firebase_uid: params[5] || null, avatar_url: params[6] || null
+            };
+            mockData.users.push(newUser);
+            return { rows: [newUser] };
+          }
+          // Classic register: INSERT INTO users (user_type, name, email, password, phone_number, dob)
+          const newUser = { user_id: Date.now(), user_type: params[0], name: params[1], email: params[2], password: params[3], phone_number: params[4], dob: params[5], firebase_uid: null, avatar_url: null };
           mockData.users.push(newUser);
           return { rows: [newUser] };
+        }
+        if (query.includes('select * from users where firebase_uid')) {
+          const user = mockData.users.find(u => u.firebase_uid === params[0]);
+          return { rows: user ? [user] : [] };
         }
         if (query.includes('select * from users where email')) {
           const user = mockData.users.find(u => u.email === params[0]);
           return { rows: user ? [user] : [] };
+        }
+        if (query.includes('update users set firebase_uid')) {
+          const user = mockData.users.find(u => u.user_id == params[2]);
+          if (user) { user.firebase_uid = params[0]; user.avatar_url = user.avatar_url || params[1]; }
+          return { rows: [] };
         }
         if (query.includes('select user_id as id') || query.includes('select * from users')) {
           if (query.includes("where user_type = 'trainer'")) {
