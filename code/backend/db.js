@@ -514,10 +514,12 @@ export function getDb() {
           return { rows: mockData.notifications.filter(n => n.user_id == params[0]).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) };
         }
         if (query.includes('update notifications set is_read')) {
-          if (params[1]) {
-            const n = mockData.notifications.find(n => n.notification_id == params[1] && n.user_id == params[0]);
+          if (query.includes('notification_id = $1 and user_id = $2') || (params.length >= 2)) {
+            // Called with [notification_id, user_id] - mark specific notification
+            const n = mockData.notifications.find(n => n.notification_id == params[0] && n.user_id == params[1]);
             if (n) n.is_read = true;
           } else {
+            // Called with [user_id] - mark all as read
             mockData.notifications.filter(n => n.user_id == params[0]).forEach(n => n.is_read = true);
           }
           return { rows: [] };

@@ -41,6 +41,12 @@ export default function Navbar({ user, onLogout, onNavigate, currentView }) {
     { label: 'Profile', view: 'profile', icon: User },
   ] : [];
 
+  const handleNotificationClick = () => {
+    const willOpen = !showNotifs;
+    setShowNotifs(willOpen);
+    if (willOpen && unreadCount > 0) markAllRead();
+  };
+
   return (
     <nav className="fixed top-0 w-full z-50 bg-black/60 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -68,7 +74,7 @@ export default function Navbar({ user, onLogout, onNavigate, currentView }) {
                   {/* Notifications */}
                   <div className="relative" ref={notifsRef}>
                     <button
-                      onClick={() => { setShowNotifs(!showNotifs); if (!showNotifs && unreadCount > 0) markAllRead(); }}
+                      onClick={handleNotificationClick}
                       className="relative w-10 h-10 rounded-full flex items-center justify-center bg-white/5 border border-white/10 hover:border-white/30 transition-colors"
                     >
                       <Bell className="w-5 h-5 text-zinc-400" />
@@ -124,7 +130,7 @@ export default function Navbar({ user, onLogout, onNavigate, currentView }) {
             {user && (
               <div className="relative" ref={notifsRef}>
                 <button
-                  onClick={() => { setShowNotifs(!showNotifs); if (!showNotifs && unreadCount > 0) markAllRead(); }}
+                  onClick={handleNotificationClick}
                   className="relative w-9 h-9 rounded-full flex items-center justify-center bg-white/5 border border-white/10"
                 >
                   <Bell className="w-4 h-4 text-zinc-400" />

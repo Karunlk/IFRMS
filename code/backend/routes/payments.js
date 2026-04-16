@@ -114,6 +114,9 @@ router.post('/confirm', authenticate, requireRole('member'), async (req, res) =>
       'SELECT membership_expiry_date FROM members WHERE member_id = $1',
       [req.user.id]
     );
+    if (!memberRes.rows[0]) {
+      return res.status(404).json({ error: 'Member record not found' });
+    }
     const existingExpiry = memberRes.rows[0]?.membership_expiry_date;
     const baseDate = existingExpiry && new Date(existingExpiry) > new Date()
       ? new Date(existingExpiry)
