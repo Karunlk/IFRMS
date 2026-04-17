@@ -10,12 +10,16 @@ const defaultPassword = bcrypt.hashSync('password123', 10);
 // In-memory mock data for when DATABASE_URL is not provided
 const mockData = {
   users: [
-    { user_id: 1, user_type: 'admin', name: 'Admin User', email: 'admin@muscleup.com', password: defaultPassword, phone_number: '123-456-7890', dob: '1990-01-01' },
-    { user_id: 2, user_type: 'trainer', name: 'Trainer User', email: 'trainer@muscleup.com', password: defaultPassword, phone_number: '123-456-7890', dob: '1990-01-01' },
-    { user_id: 3, user_type: 'member', name: 'Member User', email: 'member@muscleup.com', password: defaultPassword, phone_number: '123-456-7890', dob: '1990-01-01' }
+    { user_id: 1, user_type: 'admin', name: 'Admin User', email: 'admin@muscleup.com', password: defaultPassword, phone_number: '123-456-7890', dob: '1990-01-01', firebase_uid: null, avatar_url: null },
+    { user_id: 2, user_type: 'trainer', name: 'Trainer User', email: 'trainer@muscleup.com', password: defaultPassword, phone_number: '123-456-7890', dob: '1990-01-01', firebase_uid: null, avatar_url: null },
+    { user_id: 3, user_type: 'member', name: 'Member User', email: 'member@muscleup.com', password: defaultPassword, phone_number: '123-456-7890', dob: '1990-01-01', firebase_uid: null, avatar_url: null }
   ],
   members: [
-    { member_id: 3, membership_date: '2024-01-01' }
+    { member_id: 3, membership_date: '2024-01-01', membership_expiry_date: '2025-01-01', membership_plan: 'basic' }
+  ],
+  payments: [],
+  notifications: [
+    { notification_id: 1, user_id: 3, title: 'Welcome to MUSCLE UP!', message: 'Your membership is active. Start your fitness journey today!', is_read: false, created_at: new Date().toISOString() }
   ],
   trainers: [
     { trainer_id: 2, specialization: 'General Fitness' }
@@ -67,16 +71,45 @@ export async function initDb() {
             user_type user_role NOT NULL,
             name VARCHAR(100) NOT NULL,
             email VARCHAR(100) UNIQUE NOT NULL,
-            password VARCHAR(255) NOT NULL,
+            password VARCHAR(255),
             phone_number VARCHAR(15),
             dob DATE,
+            firebase_uid VARCHAR(128) UNIQUE,
+            avatar_url TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS members (
             member_id INT PRIMARY KEY,
             membership_date DATE NOT NULL,
+            membership_expiry_date DATE,
+            membership_plan VARCHAR(20) DEFAULT 'basic',
             FOREIGN KEY (member_id) REFERENCES users(user_id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS payments (
+            payment_id SERIAL PRIMARY KEY,
+            member_id INT NOT NULL,
+            amount DECIMAL(10,2) NOT NULL,
+            currency VARCHAR(10) DEFAULT 'INR',
+            status VARCHAR(20) DEFAULT 'pending',
+            payment_method VARCHAR(50) DEFAULT 'card',
+            stripe_payment_intent_id VARCHAR(255),
+            membership_plan VARCHAR(20) NOT NULL,
+            months INT NOT NULL DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (member_id) REFERENCES members(member_id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS notifications (
+            notification_id SERIAL PRIMARY KEY,
+            user_id INT NOT NULL,
+            title VARCHAR(200) NOT NULL,
+            message TEXT NOT NULL,
+            is_read BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
         );
 
         CREATE TABLE IF NOT EXISTS trainers (
@@ -197,8 +230,8 @@ export async function initDb() {
         `, [defaultPassword]);
         
         await db.query(`
-          INSERT INTO members (member_id, membership_date) VALUES 
-          (3, CURRENT_DATE);
+          INSERT INTO members (member_id, membership_date, membership_expiry_date, membership_plan) VALUES 
+          (3, CURRENT_DATE, CURRENT_DATE + INTERVAL '1 month', 'basic');
         `);
 
         await db.query(`
@@ -264,13 +297,33 @@ export function getDb() {
         
         // Users
         if (query.includes('insert into users')) {
-          const newUser = { user_id: Date.now(), user_type: params[0], name: params[1], email: params[2], password: params[3], phone_number: params[4], dob: params[5] };
+          // Firebase upsert: INSERT INTO users (user_type, name, email, phone_number, dob, firebase_uid, avatar_url)
+          if (query.includes('firebase_uid')) {
+            const newUser = {
+              user_id: Date.now(), user_type: params[0], name: params[1], email: params[2],
+              password: null, phone_number: params[3] || null, dob: params[4] || null,
+              firebase_uid: params[5] || null, avatar_url: params[6] || null
+            };
+            mockData.users.push(newUser);
+            return { rows: [newUser] };
+          }
+          // Classic register: INSERT INTO users (user_type, name, email, password, phone_number, dob)
+          const newUser = { user_id: Date.now(), user_type: params[0], name: params[1], email: params[2], password: params[3], phone_number: params[4], dob: params[5], firebase_uid: null, avatar_url: null };
           mockData.users.push(newUser);
           return { rows: [newUser] };
+        }
+        if (query.includes('select * from users where firebase_uid')) {
+          const user = mockData.users.find(u => u.firebase_uid === params[0]);
+          return { rows: user ? [user] : [] };
         }
         if (query.includes('select * from users where email')) {
           const user = mockData.users.find(u => u.email === params[0]);
           return { rows: user ? [user] : [] };
+        }
+        if (query.includes('update users set firebase_uid')) {
+          const user = mockData.users.find(u => u.user_id == params[2]);
+          if (user) { user.firebase_uid = params[0]; user.avatar_url = user.avatar_url || params[1]; }
+          return { rows: [] };
         }
         if (query.includes('select user_id as id') || query.includes('select * from users')) {
           if (query.includes("where user_type = 'trainer'")) {
@@ -374,15 +427,16 @@ export function getDb() {
         if (query.includes('select fp.* from fitness_progress fp join workout_plans wp')) {
           if (query.includes('where wp.member_id = $1')) {
              const planIds = mockData.workout_plans.filter(w => w.member_id == params[0]).map(w => w.workout_plan_id);
-             return { rows: mockData.fitness_progress.filter(p => planIds.includes(p.workout_plan_id)) };
+             return { rows: mockData.fitness_progress.filter(p => planIds.includes(p.workout_plan_id)).map(p => ({ ...p, recorded_at: p.progress_date || p.recorded_at })) };
           }
           if (query.includes('where wp.trainer_id = $1')) {
              const planIds = mockData.workout_plans.filter(w => w.trainer_id == params[0]).map(w => w.workout_plan_id);
-             return { rows: mockData.fitness_progress.filter(p => planIds.includes(p.workout_plan_id)) };
+             return { rows: mockData.fitness_progress.filter(p => planIds.includes(p.workout_plan_id)).map(p => ({ ...p, recorded_at: p.progress_date || p.recorded_at })) };
           }
         }
         if (query.includes('insert into fitness_progress')) {
-          const newProg = { progress_id: Date.now(), workout_plan_id: params[0], weight: params[1], reps: params[2], workout_time: params[3], progress_date: new Date().toISOString() };
+          const ts = new Date().toISOString();
+          const newProg = { progress_id: Date.now(), workout_plan_id: params[0], weight: params[1], reps: params[2], workout_time: params[3], progress_date: ts, recorded_at: ts };
           mockData.fitness_progress.push(newProg);
           return { rows: [newProg] };
         }
@@ -397,6 +451,100 @@ export function getDb() {
             user.dob = params[3];
             return { rows: [user] };
           }
+        }
+
+        // Members - expiry and plan queries
+        if (query.includes('select membership_expiry_date from members') || query.includes('select membership_date from members')) {
+          const m = mockData.members.find(m => m.member_id == params[0]);
+          return { rows: m ? [m] : [] };
+        }
+        if (query.includes('update members set membership_expiry_date')) {
+          const m = mockData.members.find(m => m.member_id == params[2]);
+          if (m) {
+            m.membership_expiry_date = params[0];
+            m.membership_plan = params[1];
+          }
+          return { rows: [] };
+        }
+
+        // Payments
+        if (query.includes('insert into payments')) {
+          const newPayment = {
+            payment_id: Date.now(),
+            member_id: params[0],
+            amount: params[1],
+            currency: params[2] || 'INR',
+            status: params[3] || 'pending',
+            // params[4] is membership_plan, params[5] is months, params[6] is stripe_payment_intent_id
+            // when called from create-intent: [member_id, amount, currency, status, plan, months, intentId]
+            membership_plan: params[4] || 'basic',
+            months: params[5] || 1,
+            stripe_payment_intent_id: params[6] || null,
+            payment_method: 'card',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          mockData.payments.push(newPayment);
+          return { rows: [newPayment] };
+        }
+        if (query.includes('update payments set status')) {
+          // Called with [intentId, member_id] - find by intentId
+          const intentId = params[0];
+          const memberId = params[1];
+          const p = mockData.payments.find(p => p.stripe_payment_intent_id == intentId && p.member_id == memberId);
+          if (p) p.status = 'succeeded';
+          return { rows: [] };
+        }
+        if (query.includes('select p.payment_id') || (query.includes('select * from payments') && query.includes('member_id'))) {
+          const filtered = params[0]
+            ? mockData.payments.filter(p => p.member_id == params[0])
+            : mockData.payments;
+          return {
+            rows: filtered.map(p => {
+              const member = mockData.users.find(u => u.user_id == p.member_id);
+              return { ...p, id: p.payment_id, plan: p.membership_plan, member_name: member?.name || '—', member_email: member?.email || '—' };
+            })
+          };
+        }
+        if (query.includes('select * from payments') || query.includes('select payment_id as id')) {
+          const filtered = params[0]
+            ? mockData.payments.filter(p => p.member_id == params[0])
+            : mockData.payments;
+          // Add mock member info for admin view
+          return {
+            rows: filtered.map(p => {
+              const member = mockData.users.find(u => u.user_id == p.member_id);
+              return { ...p, id: p.payment_id, plan: p.membership_plan, member_name: member?.name || '—', member_email: member?.email || '—' };
+            })
+          };
+        }
+
+        // Notifications
+        if (query.includes('insert into notifications')) {
+          const newNotif = {
+            notification_id: Date.now(),
+            user_id: params[0],
+            title: params[1],
+            message: params[2],
+            is_read: false,
+            created_at: new Date().toISOString()
+          };
+          mockData.notifications.push(newNotif);
+          return { rows: [newNotif] };
+        }
+        if (query.includes('select * from notifications') || query.includes('select notification_id')) {
+          return { rows: mockData.notifications.filter(n => n.user_id == params[0]).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) };
+        }
+        if (query.includes('update notifications set is_read')) {
+          if (query.includes('notification_id = $1 and user_id = $2') || (params.length >= 2)) {
+            // Called with [notification_id, user_id] - mark specific notification
+            const n = mockData.notifications.find(n => n.notification_id == params[0] && n.user_id == params[1]);
+            if (n) n.is_read = true;
+          } else {
+            // Called with [user_id] - mark all as read
+            mockData.notifications.filter(n => n.user_id == params[0]).forEach(n => n.is_read = true);
+          }
+          return { rows: [] };
         }
 
         return { rows: [] };

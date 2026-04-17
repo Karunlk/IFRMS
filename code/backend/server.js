@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -18,8 +19,35 @@ import usersRoutes from './routes/users.js';
 import programmesRoutes from './routes/programmes.js';
 import workoutsRoutes from './routes/workouts.js';
 import progressRoutes from './routes/progress.js';
+import paymentsRoutes from './routes/payments.js';
+import notificationsRoutes from './routes/notifications.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Rate limiters
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' }
+});
+
+const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // Stricter limit for payment routes
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many payment requests, please try again later.' }
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Strict limit for auth
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many authentication attempts, please try again later.' }
+});
 
 async function startServer() {
   await initDb();
@@ -31,14 +59,16 @@ async function startServer() {
   app.use(express.json());
 
   // API Routes
-  app.use('/api/auth', authRoutes);
-  app.use('/api/equipment', equipmentRoutes);
-  app.use('/api/schedule', scheduleRoutes);
-  app.use('/api/reports', reportsRoutes);
-  app.use('/api/users', usersRoutes);
-  app.use('/api/programmes', programmesRoutes);
-  app.use('/api/workouts', workoutsRoutes);
-  app.use('/api/progress', progressRoutes);
+  app.use('/api/auth', authLimiter, authRoutes);
+  app.use('/api/equipment', generalLimiter, equipmentRoutes);
+  app.use('/api/schedule', generalLimiter, scheduleRoutes);
+  app.use('/api/reports', generalLimiter, reportsRoutes);
+  app.use('/api/users', generalLimiter, usersRoutes);
+  app.use('/api/programmes', generalLimiter, programmesRoutes);
+  app.use('/api/workouts', generalLimiter, workoutsRoutes);
+  app.use('/api/progress', generalLimiter, progressRoutes);
+  app.use('/api/payments', paymentLimiter, paymentsRoutes);
+  app.use('/api/notifications', generalLimiter, notificationsRoutes);
 
   // Vite Middleware for Frontend
   if (process.env.NODE_ENV !== 'production') {
