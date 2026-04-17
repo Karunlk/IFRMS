@@ -8,13 +8,16 @@
  */
 import { initializeApp, getApps } from 'firebase/app';
 import {
+  initializeAuth,
   getAuth,
+  getReactNativePersistence,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
   sendPasswordResetEmail,
   signOut as firebaseSignOut,
 } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
 const {
@@ -41,8 +44,14 @@ if (isFirebaseConfigured) {
     appId: firebaseAppId,
   };
 
-  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-  _auth = getAuth(app);
+  if (getApps().length === 0) {
+    const app = initializeApp(firebaseConfig);
+    _auth = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    });
+  } else {
+    _auth = getAuth(getApps()[0]);
+  }
 }
 
 export const auth = _auth;

@@ -3,6 +3,7 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
 
 import { useAuth } from '../context/AuthContext';
 import { setUnauthorizedHandler } from '../utils/api';
@@ -23,13 +24,21 @@ const TAB_BAR_STYLE = {
   borderTopColor: '#27272a',
 };
 
-const TAB_SCREEN_OPTIONS = {
+const TAB_SCREEN_OPTIONS = ({ route }) => ({
   headerShown: false,
   tabBarStyle: TAB_BAR_STYLE,
   tabBarActiveTintColor: '#f43f5e',
   tabBarInactiveTintColor: '#71717a',
   tabBarLabelStyle: { fontSize: 11, fontWeight: '700' },
-};
+  tabBarIcon: ({ color, size }) => {
+    const icons = {
+      Dashboard: 'grid-outline',
+      Schedule: 'calendar-outline',
+      Profile: 'person-outline',
+    };
+    return <Ionicons name={icons[route.name] ?? 'help-outline'} size={size} color={color} />;
+  },
+});
 
 function MemberTabs() {
   return (
